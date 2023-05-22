@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../Shared/Components/components.dart';
 import '../../../Shared/cubit/cubit.dart';
 import '../../../Shared/cubit/states.dart';
-import '../Categories/Personal.dart';
 
 class NewTasksScreen extends StatelessWidget {
   @override
@@ -13,7 +12,6 @@ class NewTasksScreen extends StatelessWidget {
         listener: (context, state) {},
         builder: (context, state) {
 
-          //AppCubit.get(context).isCategory(context);
           var cat;
 
           if(AppCubit.get(context).category == 'Personal')
@@ -29,7 +27,7 @@ class NewTasksScreen extends StatelessWidget {
           else if(AppCubit.get(context).category == "Others")
             cat = AppCubit.get(context).other;
           else if(AppCubit.get(context).category == "All")
-            cat = AppCubit.get(context).New_tasks;
+            cat = AppCubit.get(context).newTasks;
 
           var tasks = cat;
 

@@ -27,7 +27,7 @@ class ArchivedTasksScreen extends StatelessWidget {
           else if(AppCubit.get(context).category == "Others")
             cat = AppCubit.get(context).archivedOther;
           else if(AppCubit.get(context).category == "All")
-            cat = AppCubit.get(context).Archived_tasks;
+            cat = AppCubit.get(context).archivedTasks;
 
           var tasks = cat;
 

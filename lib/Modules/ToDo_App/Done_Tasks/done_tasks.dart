@@ -30,7 +30,7 @@ class DoneTasksScreen extends StatelessWidget {
           else if(AppCubit.get(context).category == "Others")
             cat = AppCubit.get(context).doneOther;
           else if(AppCubit.get(context).category == "All")
-            cat = AppCubit.get(context).Done_tasks;
+            cat = AppCubit.get(context).doneTasks;
 
           var tasks = cat;
 

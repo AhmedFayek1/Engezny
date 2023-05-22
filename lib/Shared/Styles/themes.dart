@@ -28,7 +28,8 @@ ThemeData DarkMode = ThemeData(
             fontWeight: FontWeight.w600,
             color: Colors.white
         )
-    )
+    ),
+
 );
 
 ThemeData LighteMode = ThemeData(

@@ -26,14 +26,15 @@ class TaskDetails extends StatelessWidget {
         listener: (context,state) {
           if(state is AppRefreshState)
             {
-              AppCubit.get(context).Get_Data_From_Database(AppCubit.get(context).database);
+              AppCubit.get(context).getData(AppCubit.get(context).database);
             }
         },
         builder: (context,state) {
           titleTaskController.text = model['title'];
           // timeTaskController.text = model['time'];
           // dateTaskController.text = model['date'];
-          typeTaskController.text = model['type'];
+
+          var cubit = AppCubit.get(context);
 
           return Scaffold(
             appBar: AppBar(
@@ -42,11 +43,10 @@ class TaskDetails extends StatelessWidget {
                   bottom: Radius.circular(30),
                 ),
               ),
-              backgroundColor: Colors.lightBlueAccent,
-              title: Text("Task Details"),
+
+            backgroundColor: Theme.of(context).primaryColor,
             ),
-            backgroundColor: Colors.white,
-            body:  SingleChildScrollView(
+            body:  SingleChildScrollView(   // title: Text("Task Details",style: TextStyle(color: Theme.of(c),),
               child: Padding(
                 padding: const EdgeInsets.all(20.00),
                 child: Form(
@@ -65,8 +65,10 @@ class TaskDetails extends StatelessWidget {
                           return null;
                         },
                         decoration: InputDecoration(
-                          //hintText: "Email Address",
-                          labelText: "Task Title",
+                          fillColor: Colors.grey[200],
+                          filled: true,
+                          hintText: "Email Address",
+                          //labelText: "Task Title",
                           prefixIcon: Icon(
                               Icons.title_outlined),
                           border: OutlineInputBorder(),
@@ -94,6 +96,8 @@ class TaskDetails extends StatelessWidget {
                           });
                         },
                         decoration: InputDecoration(
+                          fillColor: Colors.grey[200],
+                          filled: true,
                           hintText: model["time"],
                           //labelText: "Task Time",
                           prefixIcon: Icon(
@@ -126,6 +130,8 @@ class TaskDetails extends StatelessWidget {
                           );
                         },
                         decoration: InputDecoration(
+                          fillColor: Colors.grey[200],
+                          filled: true,
                           hintText: model["date"],
                           //labelText: "Task Date",
                           prefixIcon: Icon(
@@ -134,20 +140,26 @@ class TaskDetails extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 10.00,),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.00),
-                        child: Container(
-                          width: double.infinity,
-                          child: DropdownButton<String>(
-                            dropdownColor: Colors.orange,
-                            borderRadius: BorderRadius.circular(20.00),
-                            value: model["type"],
-                            items: AppCubit.get(context).Types.map((e) => DropdownMenuItem<String>(value: e,child: Text(e))).toList(),
-                            onChanged: (value) {
-                              typeTaskController.text = value!;
-                            },
+                      Container(
+                        color: Colors.grey[200],
+
+                        width: double.infinity,
+                        child: Center(
+                          child: DropdownButton(
+                            dropdownColor: Colors.grey[200],
+                              value: cubit.selectedItem,
+                              items: cubit.types.map((item) {
+                                return DropdownMenuItem(
+                                    value: item,
+                                    child: Text(item)
+                                );
+                              }).toList(),
+                              onChanged: (String? value) {
+                                cubit.changeDropDownItem(value);
+                                typeTaskController.text = value!;
+                              }
                           ),
-                        ),
+                        )
                       ),
                       SizedBox(height: 20.00,),
                       Container( 
@@ -161,7 +173,7 @@ class TaskDetails extends StatelessWidget {
                             onPressed: () {
                               if(formkey.currentState!.validate()) {
                                 print("${timeTaskController.text} + ${dateTaskController.text}");
-                                AppCubit.get(context).UpdateTaskDatabase(
+                                AppCubit.get(context).updateTask(
                                     id: model['id'],
                                     title: titleTaskController.text,
                                     time: timeTaskController.text,
@@ -170,8 +182,7 @@ class TaskDetails extends StatelessWidget {
                                     context: context
                                 );
                                  Navigator.pop(context);
-                                 AppCubit.get(context).Get_Data_From_Database(AppCubit.get(context).database);
-
+                                 //AppCubit.get(context).getData(AppCubit.get(context).database);
                               }
                             },
                             child: Text("UPDATE")
@@ -187,7 +198,7 @@ class TaskDetails extends StatelessWidget {
                         ),
                         child: TextButton(
                             onPressed: () {
-                              AppCubit.get(context).DeleteDatabase(id: model['id']);
+                              AppCubit.get(context).deleteTask(id: model['id']);
                               Navigator.pop(context);
                             },
                             child: Text("DELETE")
@@ -205,12 +216,13 @@ class TaskDetails extends StatelessWidget {
                         child: TextButton(
                             onPressed: () {
                               if(formkey.currentState!.validate()) {
-                                AppCubit.get(context).DeleteDatabase(id: model["id"]);
-                                AppCubit.get(context).Insert_Database(
+                                //AppCubit.get(context).deleteTask(id: model["id"]);
+                                AppCubit.get(context).updateTask(
+                                    id: model['id'],
                                     title: titleTaskController.text,
                                     time: timeTaskController.text,
                                     date: dateTaskController.text,
-                                    type: typeTaskController.text
+                                    type: typeTaskController.text == "" ? model['type'] : typeTaskController.text,
                                 );
                                 Navigator.pop(context);
                               }
@@ -232,7 +244,7 @@ class TaskDetails extends StatelessWidget {
                               ),
                               child: TextButton(
                                   onPressed: () {
-                                    AppCubit.get(context).UpdateDatabase(
+                                    AppCubit.get(context).updateData(
                                       status: 'done',
                                       id: model['id'],
                                     );
@@ -255,7 +267,7 @@ class TaskDetails extends StatelessWidget {
                               ),
                               child: TextButton(
                                   onPressed: () {
-                                    AppCubit.get(context).ArchiveDatabase(
+                                    AppCubit.get(context).archiveData(
                                         status: 'Archived',
                                         id: model['id']);
                                     Navigator.pop(context);
@@ -275,7 +287,7 @@ class TaskDetails extends StatelessWidget {
                                 ),
                                 child: TextButton(
                                     onPressed: () {
-                                      AppCubit.get(context).ArchiveDatabase(
+                                      AppCubit.get(context).archiveData(
                                           status: 'Archived',
                                           id: model['id']);
                                       Navigator.pop(context);

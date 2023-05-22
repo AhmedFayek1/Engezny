@@ -21,11 +21,11 @@ void main() async
   Bloc.observer = MyBlocObserver();
   await cache_helper.init();
 
-  final cron = Cron();
-  cron.schedule(Schedule.parse('*/1 * * * *'), () async {
-  ShowToast(message: "This code runs at 12am everyday", state: ToastStates.SUCCESS);
-    print("This code runs at 12am everyday");
-  });
+  // final cron = Cron();
+  // cron.schedule(Schedule.parse('*/1 * * * *'), () async {
+  // ShowToast(message: "This code runs at 12am everyday", state: ToastStates.SUCCESS);
+  //   print("This code runs at 12am everyday");
+  // });
   bool? IsDark = cache_helper.GetData(key: 'IsDark');
 
   runApp(MyApp(IsDark));
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (BuildContext context) => ThemeCubit()..ChangeMode(fromshared: IsDark)), 
-        BlocProvider(create: (BuildContext context) => AppCubit()..Create_Database())
+        BlocProvider(create: (BuildContext context) => AppCubit()..createDatabase())
       ],
       child: BlocConsumer<ThemeCubit,ThemeStates>(
         listener: (context,state) {},

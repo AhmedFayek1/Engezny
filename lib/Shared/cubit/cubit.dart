@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:core';
 
 import 'package:bloc/bloc.dart';
@@ -6,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:todo_app/Shared/Components/components.dart';
 import 'package:todo_app/Shared/cubit/states.dart';
 import '../../Modules/ToDo_App/Archived_Tasks/archived_tasks.dart';
 import '../../Modules/ToDo_App/Done_Tasks/done_tasks.dart';
@@ -26,21 +24,21 @@ class AppCubit extends Cubit<AppStates> {
     ArchivedTasksScreen(),
   ];
 
-  List<String> Titles = [
+  List<String> titles = [
     'New Tasks',
     'Done Tasks',
     'Archived Tasks',
   ];
 
-  void ChangeIndex(int index) {
+  void changeIndex(int index) {
     currentIndex = index;
     emit(ChangeNavBar());
   }
 
   Database? database;
-  List<Map> New_tasks = [];
-  List<Map> Done_tasks = [];
-  List<Map> Archived_tasks = [];
+  List<Map> newTasks = [];
+  List<Map> doneTasks = [];
+  List<Map> archivedTasks = [];
   List<Map> personalTasks = [];
   List<Map> workTasks = [];
   List<Map> studyingTasks = [];
@@ -68,7 +66,7 @@ class AppCubit extends Cubit<AppStates> {
 
 
 
-  void Create_Database() {
+  void createDatabase() {
     openDatabase(
       'todo',
       version: 1,
@@ -84,7 +82,7 @@ class AppCubit extends Cubit<AppStates> {
         });
       },
       onOpen: (database) {
-        Get_Data_From_Database(database);
+        getData(database);
         print("database opened");
       },
     ).then((value) {
@@ -93,7 +91,7 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-  Insert_Database({
+  insertData({
     required String title,
     required String time,
     required String date,
@@ -107,7 +105,7 @@ class AppCubit extends Cubit<AppStates> {
         print("Inserted Succesfully");
         emit(AppInsertDatabaseState());
 
-        Get_Data_From_Database(database);
+        getData(database);
       }).catchError((error) {
         print("error inserting ${error.toString()}");
       });
@@ -115,11 +113,11 @@ class AppCubit extends Cubit<AppStates> {
     });
   }
 
-  void Get_Data_From_Database(database) {
+  void getData(database) {
     //All Tasks
-    New_tasks = [];
-    Done_tasks = [];
-    Archived_tasks = [];
+    newTasks = [];
+    doneTasks = [];
+    archivedTasks = [];
 
     //All Categories in new Tasks
     personalTasks = [];
@@ -153,11 +151,11 @@ class AppCubit extends Cubit<AppStates> {
       value.forEach((element) {
         //Fill All Tasks
         if (element['status'] == 'new')
-          New_tasks.add(element);
+          newTasks.add(element);
         else if (element['status'] == 'done')
-          Done_tasks.add(element);
+          doneTasks.add(element);
         else if (element['status'] == 'Archived')
-          Archived_tasks.add(element);
+          archivedTasks.add(element);
 
         //Fill All Categories in New Tasks
         if(element['type'] == 'Personal' && element['status'] == 'new')
@@ -214,7 +212,7 @@ class AppCubit extends Cubit<AppStates> {
 
   IconData fabicon = Icons.edit;
 
-  void ChangeState({
+  void changeState({
     required bool isshow,
     required IconData icon,
   }) {
@@ -224,60 +222,45 @@ class AppCubit extends Cubit<AppStates> {
     emit(AppChangeBottomCheetState());
   }
 
-  void UpdateDatabase({required String status, required int id}) {
+  void updateData({required String status, required int id}) {
     database
         ?.rawUpdate('UPDATE tasks SET status = ? WHERE id = ?', [status, id]);
-    Get_Data_From_Database(database);
+    getData(database);
     emit(AppUpdateDatabaseState());
   }
 
-  void UpdateTaskDatabase({required int id,required String title, required String time,required String date,required String type,context}) {
+  void updateTask({required int id,required String title, required String time,required String date,required String type,context}) {
     database?.rawUpdate('UPDATE tasks SET title = ? WHERE id = ?', [title, id]);
     database?.rawUpdate('UPDATE tasks SET time = ? WHERE id = ?', [time, id]);
     database?.rawUpdate('UPDATE tasks SET date = ? WHERE id = ?', [date, id]);
     database?.rawUpdate('UPDATE tasks SET type = ? WHERE id = ?', [type, id]);
 
-    Get_Data_From_Database(database);
+    getData(database);
     //Navigator.of(context).push(new MaterialPageRoute(builder: (context) => NewTasksScreen()));
     emit(AppUpdateDatabaseState());
   }
 
-  void ArchiveDatabase({required String status, required int id}) {
+  void archiveData({required String status, required int id}) {
     database
         ?.rawUpdate('UPDATE tasks SET status = ? WHERE id = ?', [status, id]);
-    Get_Data_From_Database(database);
+    getData(database);
     emit(AppArchivedDatabaseState());
   }
 
-  void DeleteDatabase({required int id}) {
+  void deleteTask({required int id}) {
     database?.rawUpdate('DELETE FROM tasks WHERE id = ?', [id]);
-    Get_Data_From_Database(database);
+    getData(database);
     emit(AppDeleteDatabaseState());
   }
 
-  // bool IsDark = false;
-  //
-  // void ChangeMode({bool? fromshared}) {
-  //   if (fromshared != null) {
-  //     IsDark = fromshared;
-  //     emit(ChangeAppModeState());
-  //   }
-  //   else {
-  //     IsDark = !IsDark;
-  //     cache_helper.PutData(key: 'IsDark', value: IsDark).then((value) {
-  //       emit(ChangeAppModeState());
-  //     });
-  //   }
-  //         }
-
-  List<String> Types = ["Personal","Work","Studying","WishList","Shopping","Other"];
+  List<String> types = ["Personal","Work","Studying","WishList","Shopping","Other"];
 
   var selectedItem = 'Personal';
   //Function(String) get changeDropDownItem => selectedItem.sink.add;
   void changeDropDownItem(value)
   {
+    cat = value;
     selectedItem = value;
-    //print(selectedItem);
     emit(SelectedItemCategory());
   }
 
@@ -334,31 +317,15 @@ class AppCubit extends Cubit<AppStates> {
     else if(AppCubit.get(context).category == "Others")
       cat = other;
     else if(AppCubit.get(context).category == "All")
-      cat = New_tasks;
+      cat = newTasks;
 
     emit(ChooseCategory());
   }
 
-  Map<String,dynamic> mp = {
-    'Personal': Colors.blue,
-    'Work': Colors.green,
-    'Studying': Colors.deepOrange,
-    'WishList': Colors.amber,
-    'Shopping': Colors.black,
-    'Other': Colors.pink,
-  };
-
-
-
-
-
-
-
-
   bool flag = false;
   void refresh()
   {
-      Get_Data_From_Database(database);
+      getData(database);
       emit(AppRefreshState());
   }
 
